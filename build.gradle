@@ -1,0 +1,93 @@
+
+buildscript {
+	dependencies {
+		classpath("org.openapitools:openapi-generator-gradle-plugin:6.3.0")
+	}
+}
+
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.12'
+	id 'io.spring.dependency-management' version '1.1.3'
+	id "org.openapi.generator" version "6.3.0"
+}
+
+
+ext {
+	set('mapstructVersion', "1.5.5.Final")
+}
+
+
+
+group = 'com.dongawis'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	//mapstruct
+	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+	annotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+	testAnnotationProcessor("org.mapstruct:mapstruct-processor:${mapstructVersion}")
+
+// OPENAPI
+	implementation('io.swagger:swagger-annotations:1.6.8')
+	implementation('org.openapitools:jackson-databind-nullable:0.2.3')
+	implementation('org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2')
+
+}
+
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+openApiGenerate {
+	generatorName = "spring"
+	inputSpec = "$rootDir/openapi/main.yaml".toString()
+	outputDir = "$buildDir/generated/sources/openapi".toString()
+	apiPackage = "cm.dongawis.picture.api"
+	modelPackage = "cm.dongawis.picture.api.dto"
+	configOptions = [
+			dateLibrary         : "java8-localdatetime",
+			library             : "spring-boot",
+			interfaceOnly       : "true",
+			useTags             : "true",
+			skipDefaultInterface: "true",
+			useSpringBoot3 : "true"
+	]
+	typeMappings = [
+			time: "java.time.LocalTime",
+	]
+}
+
+
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+
+
+
+compileJava.dependsOn(
+		tasks.openApiGenerate
+)
+sourceSets.main.java.srcDir "${buildDir}/generated/sources/openapi/src/main/java"
+

@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Tenant Rest API
+  description: REST API endpoints for managing Tenant
+  version: 2023-W38
+paths:
+  /demo:
+    get:
+      tags:
+        - Demo
+      summary: Demo Summary
+      description: Demo Description
+      operationId: fetchAllDemo
+      security:
+        - oAuth:
+            - demo:read:all
+      parameters:
+        - name: fieldsToExtractCode
+          in: query
+          required: true
+          schema:
+            type: string
+          description: specify the fields that will be present on the response
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DemoDTO'
+components:
+  securitySchemes:
+    oAuth:
+      type: oauth2
+      description: This API uses OAuth 2 with the Authorization Code grant flow.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.oauth.lao-sarl.cm
+          tokenUrl: https://token.oauth.lao-sarl.cm
+          scopes:
+            demo:read:all: Read all Demo
+  schemas:
+    DemoDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
